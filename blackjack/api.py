@@ -170,7 +170,7 @@ def get_game(request, pk: int):
     
     return _build_game_schema(game)
 
-# Fonction helper pour construire le schéma de jeu
+
 def _build_game_schema(game: Game) -> GameSchema:
     players_data = [
         PlayerSchema(
