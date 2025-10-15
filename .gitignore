@@ -1,0 +1,4 @@
+/venv/
+/blackjack/__pycache__/
+/blackjack/migrations/__pycache__/
+/blackjack/migrations/0001_initial.py
