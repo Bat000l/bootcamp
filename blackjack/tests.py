@@ -1,4 +1,6 @@
-from django.test import TestCase
+from django.test import TestCase, Client
+from django.urls import reverse
+import json
 from blackjack.models import Game, Player
 
 # Create your tests here.
@@ -149,3 +151,67 @@ class GameCurrentPlayerTestCase(TestCase):
         
         # Should return David (first active player under 21)
         self.assertEqual(current, player4)
+
+
+class GameApiTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+    def test_start_game_api(self):
+        response = self.client.post('/game/start', data=json.dumps({
+            "name": "API Test Game",
+            "players": ["Alice", "Bob"]
+        }), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['name'], "API Test Game")
+        self.assertEqual(len(data['players']), 2)
+
+    def test_play_roll_api(self):
+        # Crée une partie
+        start_resp = self.client.post('/game/start', data=json.dumps({
+            "name": "API Test Game",
+            "players": ["Alice", "Bob"]
+        }), content_type='application/json')
+        game_id = start_resp.json()['id']
+        # Action roll
+        play_resp = self.client.post('/game/play', data=json.dumps({
+            "game_id": game_id,
+            "action": "roll",
+            "num_dice": 2
+        }), content_type='application/json')
+        self.assertEqual(play_resp.status_code, 200)
+        play_data = play_resp.json()
+        self.assertTrue(play_data['success'])
+        self.assertIn('game', play_data)
+
+    def test_play_stand_api(self):
+        # Crée une partie
+        start_resp = self.client.post('/game/start', data=json.dumps({
+            "name": "API Test Game",
+            "players": ["Alice", "Bob"]
+        }), content_type='application/json')
+        game_id = start_resp.json()['id']
+        # Action stand
+        play_resp = self.client.post('/game/play', data=json.dumps({
+            "game_id": game_id,
+            "action": "stand"
+        }), content_type='application/json')
+        self.assertEqual(play_resp.status_code, 200)
+        play_data = play_resp.json()
+        self.assertTrue(play_data['success'])
+        self.assertIn('game', play_data)
+
+    def test_get_game_api(self):
+        # Crée une partie
+        start_resp = self.client.post('/game/start', data=json.dumps({
+            "name": "API Test Game",
+            "players": ["Alice", "Bob"]
+        }), content_type='application/json')
+        game_id = start_resp.json()['id']
+        # GET état
+        get_resp = self.client.get(f'/game/{game_id}')
+        self.assertEqual(get_resp.status_code, 200)
+        get_data = get_resp.json()
+        self.assertEqual(get_data['id'], game_id)
+        self.assertEqual(get_data['name'], "API Test Game")

@@ -11,14 +11,14 @@ export const useStartGame = () => {
     
     try {
       // Appel API pour créer la partie
-      const response = await fetch('http://localhost:8000/api/games/', {
+      const response = await fetch('http://localhost:8000/game/start', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           name: gameName,
-          players: players.map(name => ({ name }))
+          players: players
         })
       });
 

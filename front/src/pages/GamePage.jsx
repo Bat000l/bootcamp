@@ -1,44 +1,32 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useGameState } from '../hooks/useGameState';
 import PlayerInGame from '../components/PlayerInGame';
 import '../styles/GamePage.css';
 
 function GamePage() {
   const { gameId } = useParams();
-
-  const [gameState, setGameState] = useState({
-    name: "Partie de test",
-    players: [
-      { id: 1, name: "Alice", score: 18, has_busted: false, has_stayed: true, is_current: false },
-      { id: 2, name: "Bob", score: 15, has_busted: false, has_stayed: false, is_current: true },
-      { id: 3, name: "Charlie", score: 23, has_busted: true, has_stayed: false, is_current: false },
-      { id: 4, name: "Diana", score: 12, has_busted: false, has_stayed: false, is_current: false }
-    ]
-  });
-  const [loading, setLoading] = useState(false);
   const [diceCount, setDiceCount] = useState(1);
-
-
+  const { game, loading, error, rollDice, stand } = useGameState(gameId);
 
   if (loading) {
     return <div>Chargement...</div>;
   }
 
-  if (!gameState) {
+  if (error) {
+    return <div className="error-message">{error}</div>;
+  }
+
+  if (!game) {
     return <div>Erreur lors du chargement de la partie</div>;
   }
 
-  const handleRoll = () => {
-    console.log(`ROLL with ${diceCount} dice(s)`);
-    // TODO: call backend roll endpoint with diceCount when ready
-  };
-
-  const currentPlayer = gameState.players.find(p => p.is_current);
+  const currentPlayer = game.players.find(p => p.is_current);
 
   return (
     <div className="game-container">
       <div className="game-card">
-        <h1>{gameState.name}</h1>
+        <h1>{game.name}</h1>
         <div className="current-turn">
           Au tour de "{currentPlayer?.name || 'Personne'}"
         </div>
@@ -54,19 +42,21 @@ function GamePage() {
               <option key={n} value={n}>{n}</option>
             ))}
           </select>
-          <button className="btn-action" onClick={handleRoll}>ROLL</button>
-          <button className="btn-action btn-secondary" onClick={() => console.log('STAND')}>STAND</button>
+          <button className="btn-action" onClick={() => rollDice(diceCount)} disabled={loading}>
+            ROLL
+          </button>
+          <button className="btn-action btn-secondary" onClick={stand} disabled={loading}>
+            STAND
+          </button>
         </div>
         <div className="players-section">
           <h2>Joueurs</h2>
           <div className="players-list">
-            {gameState.players && gameState.players.map((player) => (
+            {game.players && game.players.map((player) => (
               <PlayerInGame key={player.id} player={player} />
             ))}
           </div>
         </div>
-
-
       </div>
     </div>
   );
