@@ -65,6 +65,23 @@ h1 {
 .btn-start:active {
   transform: translateY(0);
 }
+
+.btn-start:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.error-message {
+  color: #d32f2f;
+  background: rgba(211, 47, 47, 0.1);
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px 0;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
 button {
   cursor: pointer;
   border: none;

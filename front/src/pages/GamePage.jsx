@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import PlayerInGame from '../components/PlayerInGame';
-import './GamePage.css';
+import '../styles/GamePage.css';
 
-function GamePage({ gameId }) {
+function GamePage() {
+  const { gameId } = useParams();
 
   const [gameState, setGameState] = useState({
     name: "Partie de test",

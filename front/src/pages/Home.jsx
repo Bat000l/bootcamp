@@ -1,10 +1,14 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PlayerInput from '../components/PlayerInput';
-import './Home.css';
+import { useStartGame } from '../hooks/useStartGame';
+import '../styles/Home.css';
 
-function Home({ onGameStart }) {
+function Home() {
   const [gameName, setGameName] = useState('');
   const [players, setPlayers] = useState(['']);
+  const { startGame, loading, error } = useStartGame();
+  const navigate = useNavigate();
 
   const handlePlayerChange = (index, value) => {
     const updatedPlayers = [...players];
@@ -16,7 +20,7 @@ function Home({ onGameStart }) {
     setPlayers(updatedPlayers);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!gameName.trim()) {
       alert('Veuillez entrer un nom de partie');
@@ -27,7 +31,14 @@ function Home({ onGameStart }) {
       alert('Veuillez ajouter au moins un joueur');
       return;
     }
-    onGameStart({ name: gameName, players: filteredPlayers });
+    
+    try {
+      const game = await startGame(gameName, filteredPlayers);
+      navigate(`/game/${game.id}`);
+    } catch (err) {
+      // L'erreur est déjà affichée dans le hook
+      console.error('Impossible de créer la partie');
+    }
   };
 
   return (
@@ -54,8 +65,9 @@ function Home({ onGameStart }) {
               />
             ))}
           </div>
-          <button type="submit" className="btn-start">
-            Lancer la partie
+          {error && <div className="error-message">{error}</div>}
+          <button type="submit" className="btn-start" disabled={loading}>
+            {loading ? 'Création...' : 'Lancer la partie'}
           </button>
         </form>
     </div>
