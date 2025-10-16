@@ -21,15 +21,22 @@ function GamePage() {
     return <div>Erreur lors du chargement de la partie</div>;
   }
 
-  const currentPlayer = game.players.find(p => p.is_current);
 
   return (
     <div className="game-container">
       <div className="game-card">
         <h1>{game.name}</h1>
-        <div className="current-turn">
-          Au tour de "{currentPlayer?.name || 'Personne'}"
-        </div>
+         <div className="current-turn">
+          {game.current_player ? (
+            <>Au tour de "{game.current_player.name}"</>
+          ) : (
+            game.winners && game.winners.length > 0 ? (
+              <>Gagnant{game.winners.length > 1 ? 's' : ''} : {game.winners.map(w => w.name).join(', ')}</>
+            ) : (
+              <>Gagnant : Aucun</>
+            )
+          )}
+         </div>
         <div className="dice-controls">
           <label htmlFor="diceCount">Nombre de dés</label>
           <select
