@@ -26,8 +26,7 @@ export function useGameState(gameId) {
   }, [gameId, fetchGame]);
 
   // Action: roll
-  const rollDice = async (diceCount) => {
-    setLoading(true);
+  const rollDice = useCallback(async (diceCount) => {
     setError(null);
     try {
       const res = await fetch(`http://localhost:8000/game/play`, {
@@ -36,17 +35,19 @@ export function useGameState(gameId) {
         body: JSON.stringify({ game_id: Number(gameId), action: 'roll', num_dice: diceCount })
       });
       if (!res.ok) throw new Error('Erreur lors du roll');
-      await fetchGame();
+      const data = await res.json();
+      if (data.success && data.game) {
+        setGame(data.game);
+      } else {
+        throw new Error(data.message || 'Erreur lors du roll');
+      }
     } catch (err) {
       setError(err.message);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [gameId]);
 
   // Action: stand
-  const stand = async () => {
-    setLoading(true);
+  const stand = useCallback(async () => {
     setError(null);
     try {
       const res = await fetch(`http://localhost:8000/game/play`, {
@@ -55,13 +56,16 @@ export function useGameState(gameId) {
         body: JSON.stringify({ game_id: Number(gameId), action: 'stand' })
       });
       if (!res.ok) throw new Error('Erreur lors du stand');
-      await fetchGame();
+      const data = await res.json();
+      if (data.success && data.game) {
+        setGame(data.game);
+      } else {
+        throw new Error(data.message || 'Erreur lors du stand');
+      }
     } catch (err) {
       setError(err.message);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [gameId]);
 
   return { game, loading, error, rollDice, stand, fetchGame };
 }

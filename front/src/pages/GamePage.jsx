@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useGameState } from '../hooks/useGameState';
 import PlayerInGame from '../components/PlayerInGame';
 import '../styles/GamePage.css';
 
 function GamePage() {
   const { gameId } = useParams();
+  const navigate = useNavigate();
   const [diceCount, setDiceCount] = useState(1);
   const { game, loading, error, rollDice, stand } = useGameState(gameId);
 
@@ -37,25 +38,33 @@ function GamePage() {
             )
           )}
          </div>
-        <div className="dice-controls">
-          <label htmlFor="diceCount">Nombre de dés</label>
-          <select
-            id="diceCount"
-            className="select-control"
-            value={diceCount}
-            onChange={(e) => setDiceCount(Number(e.target.value))}
-          >
-            {[1,2,3].map(n => (
-              <option key={n} value={n}>{n}</option>
-            ))}
-          </select>
-          <button className="btn-action" onClick={() => rollDice(diceCount)} disabled={loading}>
-            ROLL
-          </button>
-          <button className="btn-action btn-secondary" onClick={stand} disabled={loading}>
-            STAND
-          </button>
-        </div>
+        {game.current_player ? (
+          <div className="dice-controls">
+            <label htmlFor="diceCount">Nombre de dés</label>
+            <select
+              id="diceCount"
+              className="select-control"
+              value={diceCount}
+              onChange={(e) => setDiceCount(Number(e.target.value))}
+            >
+              {[1,2,3].map(n => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+            <button className="btn-action" onClick={() => rollDice(diceCount)} disabled={loading}>
+              ROLL
+            </button>
+            <button className="btn-action btn-secondary" onClick={stand} disabled={loading}>
+              STAND
+            </button>
+          </div>
+        ) : (
+          <div className="game-ended">
+            <button className="btn-action" onClick={() => navigate('/')}>
+              Retour à l'accueil
+            </button>
+          </div>
+        )}
         <div className="players-section">
           <h2>Joueurs</h2>
           <div className="players-list">
